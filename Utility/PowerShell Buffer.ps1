@@ -29,6 +29,9 @@ BEGIN {
 
     # Define the log file path
     $logDir = "C:\Windows\Logs"
+    if (-not (Test-Path $logDir)) {
+        New-Item -ItemType Directory -Path $logDir -Force
+    }
     $script:Logfile = "$logDir\log_name.log"
 
     # Create a lock object for thread safety
@@ -45,7 +48,6 @@ BEGIN {
 
     # Function to write buffered logs to the log file
     Function WriteLogsBuffer {
-        # Declare the lockToken variable
         $lockToken = $false
         try {
             [System.Threading.Monitor]::TryEnter($script:lockObject, [ref]$lockToken)
