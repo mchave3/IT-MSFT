@@ -1,22 +1,80 @@
-BEGIN{
+<#
+    .SYNOPSIS
+    This script writes logs to a log file using a buffer to improve performance.
+
+    .DESCRIPTION
+    Logs are temporarily stored in a buffer and written to the log file periodically. This reduces the performance impact caused by frequent disk I/O operations.
+
+    .NOTES
+    Author         : Mickaël CHAVE
+    Creation Date  : 2024-06-20
+    Version        : 1.0
+
+    .EXAMPLE
+    To log a message:
+    ```powershell
+    LogWrite "This is a log message."
+    ```
+#>
+
+BEGIN {
     Clear-Host
 
-    # Create a buffer to hold the logs
-    $script:logBuffer = New-Object System.Collections.Queue
-    $script:currentBuffer = $null
+    # Create a buffer to store log messages temporarily
+    $script:logBuffer = [System.Collections.Concurrent.ConcurrentQueue[string]]::new()
 
-    # Create a timer
+    # Create a timer with a 5-second interval
     $script:timer = New-Object Timers.Timer
-    $script:timer.Interval = 5000 # Interval set to 5 second (1000 milliseconds)
-
-    # Create a lock object
-    $script:lockObject = New-Object System.Object
+    $script:timer.Interval = 5000 # 5000 milliseconds = 5 seconds
 
     # Define the log file path
     $logDir = "C:\Windows\Logs"
     $script:Logfile = "$logDir\log_name.log"
 
-    # Add an event that is triggered when the timer elapses
+    # Create a lock object for thread safety
+    $script:lockObject = New-Object System.Object
+
+    # Function to add a log message to the buffer
+    Function LogWrite {
+        Param ([string]$logstring)
+        $logstring = (Get-Date -Format "MM-dd-yyyy - HH:mm:ss.fff") + " | $logstring"
+
+        # Add the log message to the buffer
+        $script:logBuffer.Enqueue($logstring)
+    }
+
+    # Function to write buffered logs to the log file
+    Function WriteLogsBuffer {
+        # Use a lock to prevent simultaneous execution
+        $lockToken = $false
+        try {
+            [System.Threading.Monitor]::TryEnter($script:lockObject, [ref]$lockToken)
+            if ($lockToken) {
+                # If there are logs in the buffer, write them to the log file
+                if ($script:logBuffer.Count -gt 0) {
+                    # Create the log file if it doesn't exist
+                    if (-not (Test-Path $script:Logfile)) {
+                        New-Item -ItemType File -Path $script:Logfile -Force
+                    }
+                    # Write the buffered logs to the log file
+                    [System.IO.File]::AppendAllLines($script:Logfile, $script:logBuffer.ToArray())
+                    # Clear the buffer
+                    [void]$script:logBuffer.Clear()
+                }
+            }
+        }
+        catch {
+            # Display an error message if writing logs fails
+            Write-Host "Error occurred while writing logs to the log file: $($_.Exception.Message)"
+        }
+        finally {
+            if ($lockToken) {
+                [System.Threading.Monitor]::Exit($script:lockObject)
+            }
+        }
+    }
+
+    # Register an event to write logs when the timer elapses
     $script:eventId = Register-ObjectEvent -InputObject $script:timer -EventName Elapsed -SourceIdentifier "TimerElapsed" -Action {
         WriteLogsBuffer
     }
@@ -25,146 +83,36 @@ BEGIN{
     $script:timer.Start()
 }
 
-PROCESS{
-    # Function for logging
-    Function LogWrite
-    {
-        Param
-        (
-            [Parameter(Mandatory=$true, Position=0)]
-            [string] $logstring,
-            [Parameter(Mandatory=$false, Position=1)]
-            [string] $level
-        )
-        switch ( $level )
-        {
-            "Info" { $logLevel = 1 }
-            "Warning" { $logLevel = 2 }
-            "Error" { $logLevel = 3 }
-            default { $logLevel = 1 }
-        }
-
-        $logDate = Get-Date -Format "MM-dd-yyyy"
-        $logTime = Get-Date -Format "HH:mm:ss.fff-00"
-        $logstring = "<![LOG[$logstring]LOG]!><time=""$logTime"" date=""$logDate"" component="""" context="""" type=""$logLevel"">"
-
-        # Add the log to the buffer
-        $script:logBuffer.Enqueue($logstring)
-    }
-
-    # Function to write logs from the buffer to the file
-    Function WriteLogsBuffer
-    {
-        # Use the lock to prevent simultaneous execution
-        $lockToken = $false
-        $streamWriter = $null
-        $fileStream = $null
-        try {
-            [System.Threading.Monitor]::TryEnter($script:lockObject, [ref]$lockToken)
-            if ($lockToken) {
-                # Copy the buffer and clear the original
-                $script:currentBuffer = $script:logBuffer.Clone()
-                $script:logBuffer.Clear()
-
-                # Check if the log file exists and create it if it doesn't
-                if (-not (Test-Path $script:Logfile)) {
-                    New-Item -ItemType File -Path $script:Logfile -Force
-                }
-                # Open the file with a file lock
-                $fileStream = [System.IO.File]::Open($script:Logfile, [System.IO.FileMode]::Append, [System.IO.FileAccess]::Write, [System.IO.FileShare]::Read)
-                $streamWriter = New-Object System.IO.StreamWriter($fileStream)
-                while($currentBuffer.Count -gt 0)
-                {
-                    $log = $currentBuffer.Dequeue()
-                    $streamWriter.WriteLine($log)
-                }
-            }
-        }
-        catch {
-            # Write the exception to a error log file
-            Write-Host "$_.Exception.Message"
-        }
-        finally {
-            if ($lockToken) {
-                if ($null -ne $streamWriter) {
-                    try {
-                        $streamWriter.Close()
-                        $streamWriter.Dispose()
-                    }
-                    catch {
-                        # Write the exception to a error log file
-                        Write-Host "$_.Exception.Message"
-                    }
-                }
-                if ($null -ne $fileStream) {
-                    try {
-                        $fileStream.Close()
-                        $fileStream.Dispose()
-                    }
-                    catch {
-                        # Write the exception to a error log file
-                        Write-Host "$_.Exception.Message"
-                    }
-                }
-                [System.Threading.Monitor]::Exit($script:lockObject)
-            }
-        }
-    }
-
+PROCESS {
     ########################################################
     # Main Script
 
+    # Log the start of the script
     LogWrite "Script starting..."
 
-    # Main code
-    try {
-        <#
-        Script..
-        #>
+    <# Your script code here #>
 
-        foreach ($int in (0..1000000)) {
-            LogWrite "$int"
-        }
+    # EXAMPLE 1: Write a log message
+    LogWrite "This is a log message."
 
-
-    }
-    catch {
-        LogWrite "An error occurred: $_" -level "Error"
+    # EXAMPLE 2: Loop of 100000 iterations, logging each iteration
+    for ($i = 0; $i -lt 100000; $i++) {
+        LogWrite "Iteration $i"
     }
 
+    # Log the end of the script
     LogWrite "Script ending..."
 }
 
-END{
-    # Check if the buffer exists
-    if ($null -ne $script:logBuffer) {
-        # Write remaining logs in the buffer
-        WriteLogsBuffer
+END {
+    # Write any remaining logs in the buffer
+    WriteLogsBuffer
 
-        # Wait for the buffers to be empty
-        while ($script:logBuffer.Count -gt 0 -or ($null -ne $script:currentBuffer -and $script:currentBuffer.Count -gt 0)) {
-            Start-Sleep -Milliseconds 100
-        }
+    # Stop the timer and clean up
+    $script:timer.Stop()
+    Unregister-Event -SourceIdentifier "TimerElapsed"
+    $script:timer.Dispose()
 
-        # Clear the buffers
-        $script:logBuffer.Clear()
-        $script:currentBuffer.Clear()
-    }
-
-    # Check if the timer exists
-    if ($null -ne $script:timer) {
-        # Stop the timer
-        $script:timer.Stop()
-
-        # Unregister the timer event
-        Unregister-Event -SourceIdentifier "TimerElapsed"
-
-        # Dispose the timer
-        $script:timer.Dispose()
-    }
-
-    # Dispose the lock object
-    if ($null -ne $script:lockObject) {
-        $script:lockObject = $null
-    }
+    # Dispose of the lock object
+    $script:lockObject = $null
 }
