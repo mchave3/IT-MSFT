@@ -50,7 +50,7 @@ BEGIN {
     Function WriteLogsBuffer {
         $lockToken = $false
         try {
-            [System.Threading.Monitor]::TryEnter($script:lockObject, [ref]$lockToken)
+            [System.Threading.Monitor]::TryEnter($script:lockObject, [ref]$lockToken) | Out-Null
             if ($lockToken) {
                 # Transfer logs from the buffer to a temporary buffer
                 $tempBuffer = [System.Collections.Concurrent.ConcurrentQueue[string]]::new()
@@ -93,10 +93,10 @@ BEGIN {
     # Function to write remaining buffered logs when the script ends
     Function WriteRemainingLogsBuffer {
         $lockToken = $false
-        while (-not [System.Threading.Monitor]::TryEnter($script:lockObject, [ref]$lockToken)) {
-            Start-Sleep -Milliseconds 100
-        }
         try {
+            while (-not [System.Threading.Monitor]::TryEnter($script:lockObject, [ref]$lockToken) | Out-Null) {
+                Start-Sleep -Milliseconds 100
+            }
             WriteLogsBuffer
         }
         finally {
@@ -127,13 +127,13 @@ PROCESS {
     # EXAMPLE 1: Write a log message
     LogWrite "This is a log message."
 
-    # EXAMPLE 2: Loop of 10000 iterations, logging each iteration
-    for ($i = 0; $i -lt 10000; $i++) {
+    # EXAMPLE 2: Loop of 100000 iterations, logging each iteration
+    for ($i = 0; $i -lt 100000; $i++) {
         # Log the iteration
         LogWrite "Iteration $i"
 
         # Update the progress bar
-        Write-Progress -Activity "Processing iterations" -Status "$i of 10000 completed" -PercentComplete (($i / 10000) * 100)
+        Write-Progress -Activity "Processing iterations" -Status "$i of 100000 completed" -PercentComplete (($i / 100000) * 100)
     }
 
     # Log the end of the script
