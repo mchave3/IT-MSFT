@@ -7,7 +7,7 @@
 
     .NOTES
     Author: Mickael CHAVE
-    Date: 27/07/2023
+    Date: 22/06/2024
     Version: 1.0
 #>
 
@@ -68,31 +68,29 @@ $Appx = @(
 $Winver = Get-ComputerInfo | Select-Object OSName,OSDisplayVersion
 LogWrite "Current OS : $($Winver.OsName) $($Winver.OSDisplayVersion)"
 
-# Get appx packages
-$InstalledPackages = Get-AppxPackage -AllUsers | Where-Object {($Appx -contains $_.Name)}
+# Get installed and provisioned packages to remove
+$InstalledPackages = Get-AppxPackage -AllUsers | Where-Object { $Appx -contains $_.Name }
+$ProvisionedPackages = Get-AppxProvisionedPackage -Online | Where-Object { $Appx -contains $_.DisplayName }
 
 # Remove all Appx packages from the list
-foreach ($AppxPackage in $InstalledPackages) {
+$InstalledPackages | ForEach-Object {
     try {
-        LogWrite "Removing Appx package: $($AppxPackage.Name)"
-        Remove-AppxPackage -Package $AppxPackage.PackageFullName -AllUsers -ErrorAction Stop
-        LogWrite "Successfully removed package: $($AppxPackage.Name)"
+        LogWrite "Removing Appx package: $($_.Name)"
+        Remove-AppxPackage -Package $_.PackageFullName -AllUsers -ErrorAction Stop
+        LogWrite "Successfully removed package: $($_.Name)"
     } catch {
-        LogWrite "Failed to remove package: $($AppxPackage.Name). Error: $_"
+        LogWrite "Failed to remove package: $($_.Name). Error: $($_.Exception.Message)"
     }
 }
 
-# Get provisioned packages
-$ProvisionedPackages = Get-AppxProvisionedPackage -Online | Where-Object {($Appx -contains $_.DisplayName)}
-
 # Remove all provisioned Appx packages from the list
-foreach ($ProvPackage in $ProvisionedPackages) {
+$ProvisionedPackages | ForEach-Object {
     try {
-        LogWrite "Removing provisioned Appx package: $($ProvPackage.DisplayName)"
-        Remove-AppxProvisionedPackage -Online -PackageName $ProvPackage.PackageName -ErrorAction Stop
-        LogWrite "Successfully removed provisioned package: $($ProvPackage.DisplayName)"
+        LogWrite "Removing provisioned Appx package: $($_.DisplayName)"
+        Remove-AppxProvisionedPackage -Online -PackageName $_.PackageName -ErrorAction Stop
+        LogWrite "Successfully removed provisioned package: $($_.DisplayName)"
     } catch {
-        LogWrite "Failed to remove provisioned package: $($ProvPackage.DisplayName). Error: $_"
+        LogWrite "Failed to remove provisioned package: $($_.DisplayName). Error: $($_.Exception.Message)"
     }
 }
 

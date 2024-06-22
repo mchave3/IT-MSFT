@@ -8,7 +8,7 @@
 
     .NOTES
     Author: Mickael CHAVE
-    Date: 27/07/2023
+    Date: 22/06/2024
     Version: 1.0
 #>
 
@@ -69,41 +69,23 @@ $Appx = @(
 $Winver = Get-ComputerInfo | Select-Object OSName,OSDisplayVersion
 LogWrite "Current OS : $($Winver.OsName) $($Winver.OSDisplayVersion)"
 
-# Get all installed Appx packages
-$InstalledPackages = Get-AppxPackage -AllUsers
+# Get all installed and provisioned Appx packages
+$InstalledPackages = Get-AppxPackage -AllUsers | Select-Object -ExpandProperty Name
+$ProvisionedPackages = Get-AppxProvisionedPackage -Online | Select-Object -ExpandProperty DisplayName
 
-# Initialize an empty array to store matching packages
-$MatchingPackages = @()
+# Combine all packages to check
+$AllPackages = $InstalledPackages + $ProvisionedPackages
 
-# Check for matches with Appx lists
-foreach ($package in $InstalledPackages) {
-    $packageName = $package.Name
-    if ($Appx -contains $packageName) {
-        $MatchingPackages += $packageName
-    }
-}
-
-# Get provisioned packages
-$ProvisionedPackages = Get-AppxProvisionedPackage -Online
-
-# Check for matches with Appx lists in provisioned packages
-foreach ($package in $ProvisionedPackages) {
-    $packageName = $package.DisplayName
-    if ($Appx -contains $packageName) {
-        $MatchingPackages += $packageName
-    }
-}
+# Find matching packages
+$MatchingPackages = $Appx | Where-Object { $AllPackages -contains $_ }
 
 # Log matching packages
-if ($MatchingPackages.Count -gt 0) {
+if ($MatchingPackages) {
     LogWrite "Matching Appx packages found:"
-    foreach ($match in $MatchingPackages) {
-        LogWrite "- $match"
-    }
+    $MatchingPackages | ForEach-Object { LogWrite "- $_" }
     LogWrite "Exiting with code 1."
     exit 1
 }
 
 LogWrite "No matching Appx packages found. Exiting with code 0."
-LogWrite "Script ending..."
 exit 0
