@@ -71,32 +71,29 @@ Test-PathExists -Path $windowsSxsPath
 
 # List WIM indexes and names
 Write-Host "Listing WIM indexes..."
-$wimInfo = dism /Get-WimInfo /WimFile:$wimPath
-$indexInfo = $wimInfo | Select-String -Pattern "Index : (\d+)|Name : (.*)"
+$wimInfo = Get-WindowsImage -ImagePath $wimPath
 
-$indexes = @()
-$names = @()
-for ($i = 0; $i -lt $indexInfo.Count; $i += 2) {
-    $index = $indexInfo[$i].Matches[0].Groups[1].Value
-    $name = $indexInfo[$i + 1].Matches[0].Groups[1].Value
-    $indexes += $index
-    $names += $name
+$wim = foreach ($index in $wimInfo) {
+    [PSCustomObject]@{        
+        Name = $index.ImageName
+        Index = $index.ImageIndex
+    }
 }
 
-if ($indexes.Count -gt 1) {
+if ($wim.Index -gt 1) {
     Write-Host "The WIM file contains multiple indexes. Please select an index to proceed:"
-    for ($i = 0; $i -lt $indexes.Count; $i++) {
-        Write-Host "$($i + 1). Index $($indexes[$i]) - $($names[$i])"
+    foreach ($index in $wim.Index) {
+        Write-Host "$index - $($wim.Name[$index - 1])"
     }
     $selection = Read-Host "Enter the number of the index you want to use"
-    if ($selection -lt 1 -or $selection -gt $indexes.Count) {
+    if ($selection -lt 1 -or $selection -gt $wim.Index.Count) {
         Write-Error "Invalid selection. Exiting."
         exit
     }
-    $index = $indexes[$selection - 1]
+    $index = $wim.Index[$selection - 1]
 } else {
-    $index = $indexes[0]
-    Write-Host "Only one index found: Index $index - $($names[0])"
+    $index = $wim.Index[0]
+    Write-Host "Only one index found: Index $index - $($wim.Name[0])"
 }
 
 # Mount the WIM
