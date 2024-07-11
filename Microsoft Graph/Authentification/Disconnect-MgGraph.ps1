@@ -19,7 +19,7 @@ CLEAN {
             Write-Host "Disconnected from Microsoft Graph"
         }
         catch {
-            Write-Host "Failed to disconnect from Microsoft Graph : $($_.exception.message)"
+            Write-Error "Failed to disconnect from Microsoft Graph : $($_.exception.message)"
         }
     }
 }
