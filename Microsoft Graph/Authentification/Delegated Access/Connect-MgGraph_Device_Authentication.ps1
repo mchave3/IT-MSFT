@@ -1,9 +1,9 @@
 <#
     .SYNOPSIS
-    Connects to Microsoft Graph using interactive authentication.
+    Connects to Microsoft Graph using device authentication.
 
     .DESCRIPTION
-    This script connects to Microsoft Graph using interactive authentication.
+    The Connect-MgGraph cmdlet connects to Microsoft Graph using device authentication.
     After connecting, you can perform operations on Microsoft Graph.
 
     .NOTES
@@ -21,10 +21,10 @@ $scopes = @(
     "Group.ReadWrite.All"
 )
 
-# Connect to Microsoft Graph using interactive authentication
+# Connect to Microsoft Graph using device authentication
 try {
     Write-Host "Authenticating to Microsoft Graph..."
-    Connect-MgGraph -Scopes $scopes -NoWelcome | Out-Null
+    Connect-MgGraph -Scopes $scopes -UseDeviceCode -NoWelcome | Out-Null
     Write-Host "Successfully authenticated to Microsoft Graph."
 }
 catch {

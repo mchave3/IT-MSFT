@@ -1,9 +1,9 @@
 <#
     .SYNOPSIS
-    Connects to Microsoft Graph using interactive authentication.
+    Connects to Microsoft Graph using app registration.
 
     .DESCRIPTION
-    This script connects to Microsoft Graph using interactive authentication.
+    The Connect-MgGraph cmdlet connects to Microsoft Graph using an app registration.
     After connecting, you can perform operations on Microsoft Graph.
 
     .NOTES
@@ -15,16 +15,14 @@
 # Install module Microsoft.Graph.Authentication
 Install-Module -Name Microsoft.Graph.Authentication
 
-# Define the required scopes
-$scopes = @(
-    "User.Read.All",
-    "Group.ReadWrite.All"
-)
+# App Registration details
+$tenantID = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+$clientID = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
-# Connect to Microsoft Graph using interactive authentication
+# Connect to Microsoft Graph using access token
 try {
     Write-Host "Authenticating to Microsoft Graph..."
-    Connect-MgGraph -Scopes $scopes -NoWelcome | Out-Null
+    Connect-MgGraph -ClientId $clientID -TenantId $tenantID -NoWelcome | Out-Null
     Write-Host "Successfully authenticated to Microsoft Graph."
 }
 catch {
