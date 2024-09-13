@@ -19,10 +19,14 @@ Add-Type -AssemblyName PresentationFramework
 [xml]$xaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Windows Sandbox Configurator" Height="450" Width="800">
+        Title="Windows Sandbox Configurator" 
+        Height="450" Width="800" 
+        ResizeMode="NoResize" 
+        WindowStartupLocation="CenterScreen">
     <Grid>
         <TabControl>
-            <TabItem Header="Home"> <!-- Home tab -->
+            <TabItem Header="Home">
+                <!-- Home tab -->
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -42,8 +46,9 @@ Add-Type -AssemblyName PresentationFramework
                     </StackPanel>
                 </Grid>
             </TabItem>
-            <TabItem Header="Settings"> <!-- Settings tab -->
-                <Grid VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5">
+            <TabItem Header="Settings">
+                <!-- Settings tab -->
+                <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5">
                     <StackPanel>
                         <!-- vGPU -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
@@ -146,12 +151,19 @@ $xaml.SelectNodes("//*[@Name]") | ForEach-Object {
 # Settings tab logic
 ##############################################################################################
 
+# vGPU checkbox event
 $Settings_Checkbox_vGPU.Add_Click({
     if ($Settings_Checkbox_vGPU.IsChecked) {
         $Settings_ComboBox_vGPU.IsEnabled = $true
     } else {
         $Settings_ComboBox_vGPU.IsEnabled = $false
+        $Settings_ComboBox_vGPU.SelectedIndex = 2
     }
+})
+
+# vGPU combobox event
+$Settings_ComboBox_vGPU.Add_SelectionChanged({
+    write-host $Settings_ComboBox_vGPU.SelectedItem
 })
 
 # Show the window
