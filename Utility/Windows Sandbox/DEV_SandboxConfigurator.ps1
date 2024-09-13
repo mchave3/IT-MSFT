@@ -126,10 +126,14 @@ Add-Type -AssemblyName System.Windows.Forms
 </Window>
 "@
 
+# Load XAML
 $reader = (New-Object System.Xml.XmlNodeReader $xaml)
 $Window = [Windows.Markup.XamlReader]::Load($reader)
 
-$Window.ShowDialog() | Out-Null
+# Create variables for each named element in the XAML
+$xaml.SelectNodes("//*[@Name]") | ForEach-Object {
+    Set-Variable -Name ($_.Name) -Value $Window.FindName($_.Name)
+}
 
 ##############################################################################################
 # Home tab logic
@@ -148,3 +152,6 @@ $Settings_Checkbox_vGPU.Add_Click({
         $Settings_ComboBox_vGPU.IsEnabled = $false
     }
 })
+
+# Show the window
+$Window.ShowDialog() | Out-Null
