@@ -129,4 +129,22 @@ Add-Type -AssemblyName System.Windows.Forms
 $reader = (New-Object System.Xml.XmlNodeReader $xaml)
 $Window = [Windows.Markup.XamlReader]::Load($reader)
 
-$Window.ShowDialog()
+$Window.ShowDialog() | Out-Null
+
+##############################################################################################
+# Home tab logic
+##############################################################################################
+
+# Logic here
+
+##############################################################################################
+# Settings tab logic
+##############################################################################################
+
+$Settings_Checkbox_vGPU.Add_Click({
+    if ($Settings_Checkbox_vGPU.IsChecked) {
+        $Settings_ComboBox_vGPU.IsEnabled = $true
+    } else {
+        $Settings_ComboBox_vGPU.IsEnabled = $false
+    }
+})
