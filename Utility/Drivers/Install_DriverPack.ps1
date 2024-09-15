@@ -30,7 +30,7 @@ if ($drivers.count -ge "0") {
             Write-Error "Error while installing driver $($driver.FullName) : $($_.Exception.Message)"
         }
     }
-    Write-Warning "All drivers installed successfully."
+    Write-Warning "Process completed ! Restart your computer to apply changes."
 }
 else {
     Write-Warning "No drivers found !"
