@@ -11,6 +11,8 @@
     Version: 1.0
 #>
 
+Clear-Host
+
 # Get all drivers in the current directory and subdirectories
 $driversPath = "C:\Drivers"
 $drivers = Get-ChildItem -Path $driversPath -Recurse -Filter "*.inf"
