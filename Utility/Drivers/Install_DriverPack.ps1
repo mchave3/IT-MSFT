@@ -12,7 +12,8 @@
 #>
 
 # Get all drivers in the current directory and subdirectories
-$drivers = Get-ChildItem -Path . -Recurse -Filter "*.inf"
+$driversPath = "C:\Drivers"
+$drivers = Get-ChildItem -Path $driversPath -Recurse -Filter "*.inf"
 
 # Install all drivers
 if ($drivers.count -eq "0") {
