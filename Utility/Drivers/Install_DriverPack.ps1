@@ -18,7 +18,7 @@ $driversPath = "C:\Drivers"
 $drivers = Get-ChildItem -Path $driversPath -Recurse -Filter "*.inf"
 
 # Install all drivers
-if ($drivers.count -eq "0") {
+if ($drivers.count -ge "0") {
     Write-Warning "$($drivers.count) drivers found !"
     foreach ($driver in $drivers) {
         try {
