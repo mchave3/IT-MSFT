@@ -145,7 +145,48 @@ $xaml.SelectNodes("//*[@Name]") | ForEach-Object {
 # Home tab logic
 ##############################################################################################
 
-# Logic here
+# Check if Windows Sandbox is installed
+function CheckWSBInstalled {
+    $WSBInstalled = Get-WindowsOptionalFeature -Online -FeatureName "Containers-DisposableClientVM" | Select-Object -ExpandProperty State
+    if ($WSBInstalled -eq "Enabled") {
+        $Home_Button_InstallWSB.IsEnabled = $false
+        $Home_Button_StartWSB.IsEnabled = $true
+    } else {
+        $Home_Button_InstallWSB.IsEnabled = $true
+        $Home_Button_StartWSB.IsEnabled = $false
+    }
+}
+
+# Install Windows Sandbox button event
+$Home_Button_InstallWSB.Add_Click({
+    Enable-WindowsOptionalFeature -Online -FeatureName "Containers-DisposableClientVM" -All
+    
+    # Prompt user to restart the computer
+    $restartPrompt = [System.Windows.Forms.MessageBox]::Show("You must restart your computer to apply the changes. Do you want to restart now?", "Restart Required", "YesNo", "Warning")
+    if ($restartPrompt -eq "Yes") {
+        Restart-Computer -Force -Wait -Timeout 60
+    }
+})
+
+# Start Sandbox button event
+$Home_Button_StartWSB.Add_Click({
+})
+
+# Open button event
+$Home_Button_Open.Add_Click({
+    $OpenFileDialog = New-Object System.Windows.Forms.OpenFileDialog
+    $OpenFileDialog.Filter = "Sandbox Configuration Files (*.wsb)|*.wsb"
+    $OpenFileDialog.Title = "Open Sandbox Configuration File"
+    $OpenFileDialog.ShowDialog() | Out-Null
+})
+
+# Save button event
+$Home_Button_Save.Add_Click({
+    $SaveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
+    $SaveFileDialog.Filter = "Sandbox Configuration Files (*.wsb)|*.wsb"
+    $SaveFileDialog.Title = "Save Sandbox Configuration File"
+    $SaveFileDialog.ShowDialog() | Out-Null
+})
 
 ##############################################################################################
 # Settings tab logic
@@ -165,6 +206,13 @@ $Settings_Checkbox_vGPU.Add_Click({
 $Settings_ComboBox_vGPU.Add_SelectionChanged({
     write-host $Settings_ComboBox_vGPU.SelectedItem
 })
+
+##############################################################################################
+# Main code
+##############################################################################################
+
+# Check if Windows Sandbox is installed
+CheckWSBInstalled
 
 # Show the window
 $Window.ShowDialog() | Out-Null
