@@ -166,7 +166,7 @@ $Home_Button_InstallWSB.Add_Click({
         # Prompt user to restart the computer
         $restartPrompt = [System.Windows.Forms.MessageBox]::Show("You must restart your computer to apply the changes. Do you want to restart now?", "Restart Required", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Warning)
         if ($restartPrompt -eq [System.Windows.Forms.DialogResult]::Yes) {
-            Restart-Computer -Force -Wait -Timeout 60
+            Restart-Computer -Force -Timeout 60
         }
     } catch {
         [System.Windows.Forms.MessageBox]::Show("An error occurred while enabling Windows Sandbox: $_", "Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
