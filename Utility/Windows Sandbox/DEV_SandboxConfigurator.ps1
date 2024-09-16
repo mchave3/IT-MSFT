@@ -159,65 +159,18 @@ function CheckWSBInstalled {
 
 # Install Windows Sandbox button event
 $Home_Button_InstallWSB.Add_Click({
-    # Create a new window for the progress bar
-    $progressWindow = New-Object system.Windows.Window
-    $progressWindow.Title = "Installation Progress"
-    $progressWindow.Width = 300
-    $progressWindow.Height = 100
-    $progressWindow.WindowStartupLocation = "CenterScreen"
+    try {
+        # Enable Windows Sandbox feature
+        Enable-WindowsOptionalFeature -Online -FeatureName "Containers-DisposableClientVM" -All -NoRestart -ErrorAction Stop
 
-    # Create a progress bar
-    $progressBar = New-Object System.Windows.Controls.ProgressBar
-    $progressBar.Minimum = 0
-    $progressBar.Maximum = 100
-    $progressBar.Width = 250
-    $progressBar.Height = 30
-    $progressBar.Value = 0
-    $progressBar.HorizontalAlignment = "Center"
-    $progressBar.VerticalAlignment = "Center"
-
-    # Add the progress bar to the window
-    $progressWindow.Content = $progressBar
-
-    # Show the progress window
-    $progressWindow.Show()
-
-    # Start a job for the installation so the UI stays responsive
-    $job = Start-Job -ScriptBlock {
-        Enable-WindowsOptionalFeature -Online -FeatureName "Containers-DisposableClientVM" -All -NoRestart
-    }
-
-    # Monitor the progress of the installation
-    $progressTimer = [System.Windows.Threading.DispatcherTimer]::new()
-    $progressTimer.Interval = [TimeSpan]::FromMilliseconds(500) # Set update interval to 500ms
-
-    $progressTimer.Add_Tick({
-        $jobState = Get-Job -Id $job.Id | Select-Object -ExpandProperty State
-        
-        if ($jobState -eq "Completed") {
-            $progressBar.Dispatcher.Invoke([action] { $progressBar.Value = 100 })
-            $progressTimer.Stop()
-
-            # Close the progress window once the installation is complete
-            $progressWindow.Close()
-
-            # Prompt user to restart the computer
-            $restartPrompt = [System.Windows.Forms.MessageBox]::Show("You must restart your computer to apply the changes. Do you want to restart now?", "Restart Required", "YesNo", "Warning")
-            if ($restartPrompt -eq "Yes") {
-                Restart-Computer -Force -Wait -Timeout 60
-            }
-        } else {
-            # Simulate progress updates (for now arbitrary, could be made smarter)
-            $progressBar.Dispatcher.Invoke([action] {
-                if ($progressBar.Value -lt 90) {
-                    $progressBar.Value += 10
-                }
-            })
+        # Prompt user to restart the computer
+        $restartPrompt = [System.Windows.Forms.MessageBox]::Show("You must restart your computer to apply the changes. Do you want to restart now?", "Restart Required", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Warning)
+        if ($restartPrompt -eq [System.Windows.Forms.DialogResult]::Yes) {
+            Restart-Computer -Force -Wait -Timeout 60
         }
-    })
-
-    # Start the progress timer
-    $progressTimer.Start()
+    } catch {
+        [System.Windows.Forms.MessageBox]::Show("An error occurred while enabling Windows Sandbox: $_", "Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
 })
 
 # Start Sandbox button event
