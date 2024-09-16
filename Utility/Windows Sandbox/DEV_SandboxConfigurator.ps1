@@ -171,6 +171,9 @@ $Home_Button_InstallWSB.Add_Click({
     } catch {
         [System.Windows.Forms.MessageBox]::Show("An error occurred while enabling Windows Sandbox: $_", "Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     }
+
+    # Check if Windows Sandbox is installed
+    CheckWSBInstalled
 })
 
 # Start Sandbox button event
