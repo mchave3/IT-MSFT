@@ -455,31 +455,31 @@ function Save-SandboxConfiguration {
 
     # vGPU
     if ($Settings_Checkbox_vGPU.IsChecked) {
-        $wsbContent += "    <VGpu>$($Settings_ComboBox_vGPU.SelectedItem)</VGpu>`r`n"
+        $wsbContent += "    <VGpu>$($Settings_ComboBox_vGPU.Text)</VGpu>`r`n"
     }
     # Networking
     if ($Settings_Checkbox_Networking.IsChecked) {
-        $wsbContent += "    <Networking>$($Settings_ComboBox_Networking.SelectedItem)</Networking>`r`n"
+        $wsbContent += "    <Networking>$($Settings_ComboBox_Networking.Text)</Networking>`r`n"
     }
     # Audio Input
     if ($Settings_Checkbox_AudioInput.IsChecked) {
-        $wsbContent += "    <AudioInput>$($Settings_ComboBox_AudioInput.SelectedItem)</AudioInput>`r`n"
+        $wsbContent += "    <AudioInput>$($Settings_ComboBox_AudioInput.Text)</AudioInput>`r`n"
     }
     # Video Input
     if ($Settings_Checkbox_VideoInput.IsChecked) {
-        $wsbContent += "    <VideoInput>$($Settings_ComboBox_VideoInput.SelectedItem)</VideoInput>`r`n"
+        $wsbContent += "    <VideoInput>$($Settings_ComboBox_VideoInput.Text)</VideoInput>`r`n"
     }
     # Protected Client
     if ($Settings_Checkbox_ProtectedClient.IsChecked) {
-        $wsbContent += "    <ProtectedClient>$($Settings_ComboBox_ProtectedClient.SelectedItem)</ProtectedClient>`r`n"
+        $wsbContent += "    <ProtectedClient>$($Settings_ComboBox_ProtectedClient.Text)</ProtectedClient>`r`n"
     }
     # Printer Redirection
     if ($Settings_Checkbox_PrinterRedirection.IsChecked) {
-        $wsbContent += "    <PrinterRedirection>$($Settings_ComboBox_PrinterRedirection.SelectedItem)</PrinterRedirection>`r`n"
+        $wsbContent += "    <PrinterRedirection>$($Settings_ComboBox_PrinterRedirection.Text)</PrinterRedirection>`r`n"
     }
     # Clipboard Redirection
     if ($Settings_Checkbox_ClipboardRedirection.IsChecked) {
-        $wsbContent += "    <ClipboardRedirection>$($Settings_ComboBox_ClipboardRedirection.SelectedItem)</ClipboardRedirection>`r`n"
+        $wsbContent += "    <ClipboardRedirection>$($Settings_ComboBox_ClipboardRedirection.Text)</ClipboardRedirection>`r`n"
     }
     # MemoryInMB
     if ($Settings_Checkbox_MemoryInMB.IsChecked) {
