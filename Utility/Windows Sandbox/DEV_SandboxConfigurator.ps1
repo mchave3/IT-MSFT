@@ -140,8 +140,35 @@ Add-Type -AssemblyName PresentationFramework
                     </StackPanel>
                 </Grid>
             </TabItem>
-            <TabItem Header="Help" Visibility="Collapsed">
-                <!-- Content for Help tab -->
+            <TabItem Header="Mapped Folders">
+                <!-- Mapped Folders tab -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
+                            <Label Content="Configuration File:" Margin="5"/>
+                            <TextBox Name="MappedFolders_TextBox_ConfigFile" Text="No Configuration File" Width="400" Margin="5" VerticalAlignment="Center" IsReadOnly="True"/>
+                        </StackPanel>
+                    </Grid>
+                    <StackPanel Grid.Row="1" VerticalAlignment="Center" Orientation="Horizontal">
+                        <!-- +, -, ^, v buttons -->
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5">
+                            <Button Content="+" Width="30" Height="30" Margin="5"/>
+                            <Button Content="-" Width="30" Height="30" Margin="5"/>
+                            <Button Content="^" Width="30" Height="30" Margin="5"/>
+                            <Button Content="v" Width="30" Height="30" Margin="5"/>
+                        </StackPanel>
+                        <DataGrid Name="MappedFolders_DataGrid" AutoGenerateColumns="False" Margin="5">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Host Folder" Binding="{Binding HostFolder}" Width="*" />
+                                <DataGridTextColumn Header="Sandbox Folder" Binding="{Binding SandboxFolder}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Grid>
             </TabItem>
             <TabItem Header="About">
                 <TextBox Text="Windows Sandbox Configurator" IsReadOnly="True" FontSize="24" TextAlignment="Center" />
