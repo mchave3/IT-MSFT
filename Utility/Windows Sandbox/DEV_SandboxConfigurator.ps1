@@ -197,7 +197,8 @@ function CheckWSBInstalled {
     if ($WSBInstalled -eq "Enabled") {
         $Home_Button_InstallWSB.IsEnabled = $false
         $Home_Button_StartWSB.IsEnabled = $true
-    } else {
+    }
+    else {
         $Home_Button_InstallWSB.IsEnabled = $true
         $Home_Button_StartWSB.IsEnabled = $false
     }
@@ -205,92 +206,94 @@ function CheckWSBInstalled {
 
 # Install Windows Sandbox button event
 $Home_Button_InstallWSB.Add_Click({
-    try {
-        # Enable Windows Sandbox feature
-        Enable-WindowsOptionalFeature -Online -FeatureName "Containers-DisposableClientVM" -All -NoRestart -ErrorAction Stop
+        try {
+            # Enable Windows Sandbox feature
+            Enable-WindowsOptionalFeature -Online -FeatureName "Containers-DisposableClientVM" -All -NoRestart -ErrorAction Stop
 
-        # Prompt user to restart the computer
-        $restartPrompt = [System.Windows.Forms.MessageBox]::Show("You must restart your computer to apply the changes. Do you want to restart now?", "Restart Required", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Warning)
-        if ($restartPrompt -eq [System.Windows.Forms.DialogResult]::Yes) {
-            shutdown.exe /r /t 60
+            # Prompt user to restart the computer
+            $restartPrompt = [System.Windows.Forms.MessageBox]::Show("You must restart your computer to apply the changes. Do you want to restart now?", "Restart Required", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Warning)
+            if ($restartPrompt -eq [System.Windows.Forms.DialogResult]::Yes) {
+                shutdown.exe /r /t 60
+            }
         }
-    } catch {
-        [System.Windows.Forms.MessageBox]::Show("An error occurred while enabling Windows Sandbox: $_", "Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
-    }
+        catch {
+            [System.Windows.Forms.MessageBox]::Show("An error occurred while enabling Windows Sandbox: $_", "Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+        }
 
-    # Check if Windows Sandbox is installed
-    CheckWSBInstalled
-})
+        # Check if Windows Sandbox is installed
+        CheckWSBInstalled
+    })
 
 # Start Sandbox button event
 $Home_Button_StartWSB.Add_Click({
-    Start-Process -FilePath "C:\Windows\System32\WindowsSandbox.exe"
-})
+        Start-Process -FilePath "C:\Windows\System32\WindowsSandbox.exe"
+    })
 
 # Open button event
 $Home_Button_Open.Add_Click({
-    $OpenFileDialog = New-Object System.Windows.Forms.OpenFileDialog
-    $OpenFileDialog.Filter = "Sandbox Configuration Files (*.wsb)|*.wsb"
-    $OpenFileDialog.Title = "Open Sandbox Configuration File"
-    $OpenFileDialog.ShowDialog() | Out-Null
+        $OpenFileDialog = New-Object System.Windows.Forms.OpenFileDialog
+        $OpenFileDialog.Filter = "Sandbox Configuration Files (*.wsb)|*.wsb"
+        $OpenFileDialog.Title = "Open Sandbox Configuration File"
+        $OpenFileDialog.ShowDialog() | Out-Null
     
-    if ($OpenFileDialog.FileName -ne "") {
-        Get-SandboxConfiguration -path $OpenFileDialog.FileName
+        if ($OpenFileDialog.FileName -ne "") {
+            Get-SandboxConfiguration -path $OpenFileDialog.FileName
 
-        $Home_TextBox_ConfigFile.Text = $OpenFileDialog.FileName
-        $Settings_TextBox_ConfigFile.Text = $OpenFileDialog.FileName
+            $Home_TextBox_ConfigFile.Text = $OpenFileDialog.FileName
+            $Settings_TextBox_ConfigFile.Text = $OpenFileDialog.FileName
 
-        $Home_Button_Save.IsEnabled = $true
-    }
-})
+            $Home_Button_Save.IsEnabled = $true
+        }
+    })
 
 # Save button event
 $Home_Button_Save.Add_Click({
-    if ($Home_TextBox_ConfigFile.Text -eq "No Configuration File") {
-        [System.Windows.Forms.MessageBox]::Show("Please open a configuration file before saving.", "Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
-    } else {
-        $wsbContent = Save-SandboxConfiguration -path $Home_TextBox_ConfigFile.Text
-        $wsbContent | Out-File -FilePath $Home_TextBox_ConfigFile.Text -Encoding utf8
+        if ($Home_TextBox_ConfigFile.Text -eq "No Configuration File") {
+            [System.Windows.Forms.MessageBox]::Show("Please open a configuration file before saving.", "Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+        }
+        else {
+            $wsbContent = Save-SandboxConfiguration -path $Home_TextBox_ConfigFile.Text
+            $wsbContent | Out-File -FilePath $Home_TextBox_ConfigFile.Text -Encoding utf8
 
-        [System.Windows.Forms.MessageBox]::Show("Configuration file saved successfully.", "Success", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
-    }
-})
+            [System.Windows.Forms.MessageBox]::Show("Configuration file saved successfully.", "Success", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+        }
+    })
 
 # Save As button event
 $Home_Button_SaveAs.Add_Click({
-    $SaveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
-    $SaveFileDialog.Filter = "Sandbox Configuration Files (*.wsb)|*.wsb"
-    $SaveFileDialog.Title = "Save Sandbox Configuration File"
-    $SaveFileDialog.ShowDialog() | Out-Null
+        $SaveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
+        $SaveFileDialog.Filter = "Sandbox Configuration Files (*.wsb)|*.wsb"
+        $SaveFileDialog.Title = "Save Sandbox Configuration File"
+        $SaveFileDialog.ShowDialog() | Out-Null
 
-    if ($SaveFileDialog.FileName -ne "") {
-        $wsbContent = Save-SandboxConfiguration -path $SaveFileDialog.FileName
-        $wsbContent | Out-File -FilePath $SaveFileDialog.FileName -Encoding utf8
+        if ($SaveFileDialog.FileName -ne "") {
+            $wsbContent = Save-SandboxConfiguration -path $SaveFileDialog.FileName
+            $wsbContent | Out-File -FilePath $SaveFileDialog.FileName -Encoding utf8
 
-        $Home_TextBox_ConfigFile.Text = $SaveFileDialog.FileName
-        $Settings_TextBox_ConfigFile.Text = $SaveFileDialog.FileName
+            $Home_TextBox_ConfigFile.Text = $SaveFileDialog.FileName
+            $Settings_TextBox_ConfigFile.Text = $SaveFileDialog.FileName
 
-        $Home_Button_Save.IsEnabled = $true
-    }
-})
+            $Home_Button_Save.IsEnabled = $true
+        }
+    })
 
 # Clear button event
 $Home_Button_Clear.Add_Click({
-    $Home_TextBox_ConfigFile.Text = "No Configuration File"
-    $Settings_TextBox_ConfigFile.Text = "No Configuration File"
+        $Home_TextBox_ConfigFile.Text = "No Configuration File"
+        $Settings_TextBox_ConfigFile.Text = "No Configuration File"
 
-    # Reset all settings
-    foreach ($control in $Window.FindName("Settings_Grid").Children) {
-        if ($control.GetType().Name -eq "StackPanel") {
-            $control.Children[0].IsChecked = $false
-            $control.Children[1].IsEnabled = $false
-            $control.Children[1].SelectedIndex = 2
+        # Reset all settings
+        foreach ($control in $Window.FindName("Settings_Grid").Children) {
+            if ($control.GetType().Name -eq "StackPanel") {
+                $control.Children[0].IsChecked = $false
+                $control.Children[1].IsEnabled = $false
+                $control.Children[1].SelectedIndex = 2
+            }
         }
-    }
 
-    $Settings_TextBox_MemoryInMB.IsEnabled = $false
-    $Settings_TextBox_MemoryInMB.Text = "512"
-})
+        $Settings_TextBox_MemoryInMB.IsEnabled = $false
+        $Settings_TextBox_MemoryInMB.Text = "512"
+    })
 
 ##############################################################################################
 # Settings tab logic
@@ -307,11 +310,13 @@ function Set-CheckboxEvent {
 
     if ($checkbox.IsChecked) {
         $control.IsEnabled = $true
-    } else {
+    }
+    else {
         $control.IsEnabled = $false
         if ($control -is [System.Windows.Controls.ComboBox]) {
             $control.SelectedIndex = $defaultIndex
-        } elseif ($control -is [System.Windows.Controls.TextBox]) {
+        }
+        elseif ($control -is [System.Windows.Controls.TextBox]) {
             $control.Text = $defaultText
         }
     }
@@ -319,43 +324,43 @@ function Set-CheckboxEvent {
 
 # vGPU checkbox event
 $Settings_Checkbox_vGPU.Add_Click({
-    Set-CheckboxEvent -checkbox $Settings_Checkbox_vGPU -control $Settings_ComboBox_vGPU
-})
+        Set-CheckboxEvent -checkbox $Settings_Checkbox_vGPU -control $Settings_ComboBox_vGPU
+    })
 
 # Networking checkbox event
 $Settings_Checkbox_Networking.Add_Click({
-    Set-CheckboxEvent -checkbox $Settings_Checkbox_Networking -control $Settings_ComboBox_Networking
-})
+        Set-CheckboxEvent -checkbox $Settings_Checkbox_Networking -control $Settings_ComboBox_Networking
+    })
 
 # Audio Input checkbox event
 $Settings_Checkbox_AudioInput.Add_Click({
-    Set-CheckboxEvent -checkbox $Settings_Checkbox_AudioInput -control $Settings_ComboBox_AudioInput
-})
+        Set-CheckboxEvent -checkbox $Settings_Checkbox_AudioInput -control $Settings_ComboBox_AudioInput
+    })
 
 # Video Input checkbox event
 $Settings_Checkbox_VideoInput.Add_Click({
-    Set-CheckboxEvent -checkbox $Settings_Checkbox_VideoInput -control $Settings_ComboBox_VideoInput
-})
+        Set-CheckboxEvent -checkbox $Settings_Checkbox_VideoInput -control $Settings_ComboBox_VideoInput
+    })
 
 # Protected Client checkbox event
 $Settings_Checkbox_ProtectedClient.Add_Click({
-    Set-CheckboxEvent -checkbox $Settings_Checkbox_ProtectedClient -control $Settings_ComboBox_ProtectedClient
-})
+        Set-CheckboxEvent -checkbox $Settings_Checkbox_ProtectedClient -control $Settings_ComboBox_ProtectedClient
+    })
 
 # Printer Redirection checkbox event
 $Settings_Checkbox_PrinterRedirection.Add_Click({
-    Set-CheckboxEvent -checkbox $Settings_Checkbox_PrinterRedirection -control $Settings_ComboBox_PrinterRedirection
-})
+        Set-CheckboxEvent -checkbox $Settings_Checkbox_PrinterRedirection -control $Settings_ComboBox_PrinterRedirection
+    })
 
 # Clipboard Redirection checkbox event
 $Settings_Checkbox_ClipboardRedirection.Add_Click({
-    Set-CheckboxEvent -checkbox $Settings_Checkbox_ClipboardRedirection -control $Settings_ComboBox_ClipboardRedirection
-})
+        Set-CheckboxEvent -checkbox $Settings_Checkbox_ClipboardRedirection -control $Settings_ComboBox_ClipboardRedirection
+    })
 
 # MemoryInMB checkbox event
 $Settings_Checkbox_MemoryInMB.Add_Click({
-    Set-CheckboxEvent -checkbox $Settings_Checkbox_MemoryInMB -control $Settings_TextBox_MemoryInMB -defaultText "512"
-})
+        Set-CheckboxEvent -checkbox $Settings_Checkbox_MemoryInMB -control $Settings_TextBox_MemoryInMB -defaultText "512"
+    })
 
 ##############################################################################################
 # Main code
@@ -388,7 +393,8 @@ function Get-SandboxConfiguration {
         $Settings_Checkbox_vGPU.IsChecked = $true
         $Settings_ComboBox_vGPU.IsEnabled = $true
         Set-ComboBoxSelection -value $xmlConfig.Configuration.VGpu -comboBox $Settings_ComboBox_vGPU
-    } else {
+    }
+    else {
         $Settings_Checkbox_vGPU.IsChecked = $false
         $Settings_ComboBox_vGPU.IsEnabled = $false
         $Settings_ComboBox_vGPU.SelectedIndex = 2
@@ -399,7 +405,8 @@ function Get-SandboxConfiguration {
         $Settings_Checkbox_Networking.IsChecked = $true
         $Settings_ComboBox_Networking.IsEnabled = $true
         Set-ComboBoxSelection -value $xmlConfig.Configuration.Networking -comboBox $Settings_ComboBox_Networking
-    } else {
+    }
+    else {
         $Settings_Checkbox_Networking.IsChecked = $false
         $Settings_ComboBox_Networking.IsEnabled = $false
         $Settings_ComboBox_Networking.SelectedIndex = 2
@@ -410,7 +417,8 @@ function Get-SandboxConfiguration {
         $Settings_Checkbox_AudioInput.IsChecked = $true
         $Settings_ComboBox_AudioInput.IsEnabled = $true
         Set-ComboBoxSelection -value $xmlConfig.Configuration.AudioInput -comboBox $Settings_ComboBox_AudioInput
-    } else {
+    }
+    else {
         $Settings_Checkbox_AudioInput.IsChecked = $false
         $Settings_ComboBox_AudioInput.IsEnabled = $false
         $Settings_ComboBox_AudioInput.SelectedIndex = 2
@@ -421,7 +429,8 @@ function Get-SandboxConfiguration {
         $Settings_Checkbox_VideoInput.IsChecked = $true
         $Settings_ComboBox_VideoInput.IsEnabled = $true
         Set-ComboBoxSelection -value $xmlConfig.Configuration.VideoInput -comboBox $Settings_ComboBox_VideoInput
-    } else {
+    }
+    else {
         $Settings_Checkbox_VideoInput.IsChecked = $false
         $Settings_ComboBox_VideoInput.IsEnabled = $false
         $Settings_ComboBox_VideoInput.SelectedIndex = 2
@@ -432,7 +441,8 @@ function Get-SandboxConfiguration {
         $Settings_Checkbox_ProtectedClient.IsChecked = $true
         $Settings_ComboBox_ProtectedClient.IsEnabled = $true
         Set-ComboBoxSelection -value $xmlConfig.Configuration.ProtectedClient -comboBox $Settings_ComboBox_ProtectedClient
-    } else {
+    }
+    else {
         $Settings_Checkbox_ProtectedClient.IsChecked = $false
         $Settings_ComboBox_ProtectedClient.IsEnabled = $false
         $Settings_ComboBox_ProtectedClient.SelectedIndex = 2
@@ -443,7 +453,8 @@ function Get-SandboxConfiguration {
         $Settings_Checkbox_PrinterRedirection.IsChecked = $true
         $Settings_ComboBox_PrinterRedirection.IsEnabled = $true
         Set-ComboBoxSelection -value $xmlConfig.Configuration.PrinterRedirection -comboBox $Settings_ComboBox_PrinterRedirection
-    } else {
+    }
+    else {
         $Settings_Checkbox_PrinterRedirection.IsChecked = $false
         $Settings_ComboBox_PrinterRedirection.IsEnabled = $false
         $Settings_ComboBox_PrinterRedirection.SelectedIndex = 2
@@ -454,7 +465,8 @@ function Get-SandboxConfiguration {
         $Settings_Checkbox_ClipboardRedirection.IsChecked = $true
         $Settings_ComboBox_ClipboardRedirection.IsEnabled = $true
         Set-ComboBoxSelection -value $xmlConfig.Configuration.ClipboardRedirection -comboBox $Settings_ComboBox_ClipboardRedirection
-    } else {
+    }
+    else {
         $Settings_Checkbox_ClipboardRedirection.IsChecked = $false
         $Settings_ComboBox_ClipboardRedirection.IsEnabled = $false
         $Settings_ComboBox_ClipboardRedirection.SelectedIndex = 2
@@ -465,7 +477,8 @@ function Get-SandboxConfiguration {
         $Settings_Checkbox_MemoryInMB.IsChecked = $true
         $Settings_TextBox_MemoryInMB.IsEnabled = $true
         $Settings_TextBox_MemoryInMB.Text = $xmlConfig.Configuration.MemoryInMB
-    } else {
+    }
+    else {
         $Settings_Checkbox_MemoryInMB.IsChecked = $false
         $Settings_TextBox_MemoryInMB.IsEnabled = $false
         $Settings_TextBox_MemoryInMB.Text = "512"
